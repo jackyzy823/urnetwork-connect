@@ -58,10 +58,11 @@ The default urls are:
 
 Usage:
     connectctl create-network [--api_url=<api_url>]
-        --network_name=<network_name>
-        --user_name=<user_name>
-        --user_auth=<user_auth>
-        --password=<password>
+		[--guest_mode]
+        [--network_name=<network_name>]
+        [--user_name=<user_name>]
+        [--user_auth=<user_auth>]
+        [--password=<password>]
     connectctl verify-send [--api_url=<api_url>]
         --user_auth=<user_auth>
     connectctl verify-network [--api_url=<api_url>]
@@ -70,9 +71,6 @@ Usage:
     connectctl login-network [--api_url=<api_url>]
         --user_auth=<user_auth>
         --password=<password>
-    connectctl verify-network [--api_url=<api_url>]
-        --user_auth=<user_auth>
-        --code=<code>
     connectctl client-id [--api_url=<api_url>] --jwt=<jwt> 
     connectctl send [--connect_url=<connect_url>] [--api_url=<api_url>] --jwt=<jwt>
         --destination_id=<destination_id>
@@ -171,14 +169,23 @@ func createNetwork(opts docopt.Opts) {
 
 	password, _ := opts.String("--password")
 
+	guestMode, _ := opts.Bool("--guest_mode")
+
 	timeout := 5 * time.Second
 
 	// /auth/network-create
 	args := map[string]any{}
-	args["user_name"] = userName
-	args["user_auth"] = userAuth
-	args["password"] = password
-	args["network_name"] = networkName
+	if guestMode {
+		args["guest_mode"] = true
+		// you could set network name too
+		// in response by_jwt_network_name will be the one you set,  network_name will be `g`+uuid
+		args["network_name"] = networkName
+	} else {
+		args["user_name"] = userName
+		args["user_auth"] = userAuth
+		args["password"] = password
+		args["network_name"] = networkName
+	}
 	args["terms"] = true
 
 	reqBody, err := json.Marshal(args)
