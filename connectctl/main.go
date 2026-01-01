@@ -224,6 +224,16 @@ func createNetwork(opts docopt.Opts) {
 	}
 
 	printResult(result)
+
+	// generate clientid
+	if guestMode {
+		if network, ok := result["network"].(map[string]any); ok {
+			if by_jwt, ok := network["by_jwt"].(string); ok {
+				opts["--jwt"] = by_jwt
+				clientId(opts)
+			}
+		}
+	}
 }
 
 func verifySend(opts docopt.Opts) {
